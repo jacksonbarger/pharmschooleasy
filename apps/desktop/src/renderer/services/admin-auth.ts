@@ -16,6 +16,52 @@ class AdminAuthService {
   private session: AdminSession | null = null;
   private failedAttempts = 0;
   private lockoutUntil: Date | null = null;
+  private readonly SESSION_STORAGE_KEY = 'admin_session';
+
+  constructor() {
+    this.loadSession();
+  }
+
+  /**
+   * Load session from storage
+   */
+  private loadSession(): void {
+    try {
+      const storedSession = localStorage.getItem(this.SESSION_STORAGE_KEY);
+      if (storedSession) {
+        const parsedSession = JSON.parse(storedSession) as AdminSession;
+        // Re-hydrate date objects
+        parsedSession.loginTime = new Date(parsedSession.loginTime);
+        parsedSession.expiresAt = new Date(parsedSession.expiresAt);
+
+        if (new Date() < parsedSession.expiresAt) {
+          this.session = parsedSession;
+        } else {
+          this.clearSession();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load admin session:', error);
+      this.clearSession();
+    }
+  }
+
+  /**
+   * Save session to storage
+   */
+  private saveSession(): void {
+    if (this.session) {
+      localStorage.setItem(this.SESSION_STORAGE_KEY, JSON.stringify(this.session));
+    }
+  }
+
+  /**
+   * Clear session from storage
+   */
+  private clearSession(): void {
+    this.session = null;
+    localStorage.removeItem(this.SESSION_STORAGE_KEY);
+  }
 
   /**
    * Authenticate admin with password
@@ -66,6 +112,8 @@ class AdminAuthService {
       remainingRequests: this.getDailyRemainingRequests(),
     };
 
+    this.saveSession(); // Save session on successful login
+
     return {
       success: true,
       message: 'Successfully authenticated as admin',
@@ -81,11 +129,18 @@ class AdminAuthService {
 
     const now = new Date();
     if (now > this.session.expiresAt) {
-      this.session = null;
+      this.session = null; // Clear session if expired
       return false;
     }
 
     return this.session.isAuthenticated;
+  }
+
+  /**
+   * Log out admin and clear session
+   */
+  logout(): void {
+    this.session = null;
   }
 
   /**
@@ -96,13 +151,6 @@ class AdminAuthService {
     if (!ADMIN_CONFIG.ADMIN_MODE_ENABLED) return null;
 
     return ADMIN_CONFIG.OPENAI_API_KEY;
-  }
-
-  /**
-   * Logout admin
-   */
-  logout(): void {
-    this.session = null;
   }
 
   /**

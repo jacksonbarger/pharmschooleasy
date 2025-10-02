@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Settings, Lightbulb } from 'lucide-react';
+import { Send, Bot, User, Lightbulb, Settings, LogIn } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { openAIService, ChatMessage } from '../services/openai';
+import { adminAuth } from '../services/admin-auth';
+import { AdminLogin } from './AdminLogin';
+import { AuthModal } from './AuthModal';
 
 export function AITutoringInterface() {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -16,8 +19,9 @@ export function AITutoringInterface() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(adminAuth.isAuthenticated());
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -28,34 +32,44 @@ export function AITutoringInterface() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const adminAuthenticated = adminAuth.isAuthenticated();
+    const userApiConfigured = openAIService.isConfigured();
+
+    setIsAuthenticated(adminAuthenticated || userApiConfigured);
+
+    if (adminAuthenticated) {
+      openAIService.setApiKey(adminAuth.getAdminApiKey() || '');
+    }
+    // If user has configured their own API key, it should already be set in the service
+  }, []);
+
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
-    if (!openAIService.isConfigured() && !apiKey) {
-      setShowSettings(true);
+    if (!adminAuth.isAuthenticated() && !openAIService.isConfigured()) {
+      setShowAuthModal(true);
       return;
     }
 
-    // Set API key if provided
-    if (apiKey) {
-      openAIService.setApiKey(apiKey);
-    }
-
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: input,
-      timestamp: new Date(),
-    };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setInput('');
-    setIsLoading(true);
-
     try {
+      setIsLoading(true);
+
+      const userMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'user',
+        content: input,
+        timestamp: new Date(),
+      };
+
+      // Use functional update to add user message immediately
+      const messageToSend = input;
+      setMessages(prevMessages => [...prevMessages, userMessage]);
+      setInput('');
+
       const pharmacyContext =
         'You are a pharmacy tutor. Provide educational, accurate information about drugs, mechanisms, interactions, and clinical applications. Focus on learning objectives for pharmacy students.';
-      const response = await openAIService.chat(input, pharmacyContext);
+      const response = await openAIService.chat(messageToSend, pharmacyContext);
 
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -64,17 +78,27 @@ export function AITutoringInterface() {
         timestamp: new Date(),
       };
 
-      setMessages([...updatedMessages, assistantMessage]);
+      setMessages(prevMessages => [...prevMessages, assistantMessage]);
     } catch (error) {
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: `I apologize, but I encountered an error: ${error}. Please check your API key configuration or try again.`,
+        content: `I apologize, but I encountered an error: ${
+          error instanceof Error ? error.message : String(error)
+        }. Please check your API key configuration or try again.`,
         timestamp: new Date(),
       };
-      setMessages([...updatedMessages, errorMessage]);
+      setMessages(prevMessages => [...prevMessages, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAuthChange = (authenticated: boolean) => {
+    setIsAuthenticated(authenticated);
+    if (authenticated) {
+      setShowAdminLogin(false);
+      openAIService.setApiKey(adminAuth.getAdminApiKey() || '');
     }
   };
 
@@ -92,8 +116,28 @@ export function AITutoringInterface() {
     "What's the difference between pharmacokinetics and pharmacodynamics?",
   ];
 
+  if (showAdminLogin) {
+    return (
+      <div className='min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-6 flex items-center justify-center'>
+        <AdminLogin onAuthChange={handleAuthChange} className='max-w-md w-full' />
+      </div>
+    );
+  }
+
   return (
-    <div className='min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-6'>
+    <div className='min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-6 relative'>
+      {/* Login Button - Top Right Corner */}
+      <div className='absolute top-6 right-6 z-10'>
+        <Button
+          onClick={() => setShowAuthModal(true)}
+          className='bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 text-white shadow-lg'
+          variant='outline'
+        >
+          <LogIn className='h-4 w-4 mr-2' />
+          {isAuthenticated ? 'Authenticated' : 'Login'}
+        </Button>
+      </div>
+
       <div className='max-w-6xl mx-auto'>
         {/* Header */}
         <div className='mb-6'>
@@ -104,73 +148,37 @@ export function AITutoringInterface() {
                   <Bot className='h-8 w-8' />
                 </div>
                 AI Pharmacy Tutor
-                <Button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className='ml-auto'
-                  variant='outline'
-                >
-                  <Settings className='h-4 w-4' />
-                </Button>
               </CardTitle>
             </CardHeader>
           </Card>
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
-          {/* Settings Panel */}
-          {showSettings && (
-            <div className='lg:col-span-1'>
-              <Card className='bg-white/10 backdrop-blur-xl border-white/20'>
-                <CardHeader>
-                  <CardTitle className='text-white'>Configuration</CardTitle>
-                </CardHeader>
-                <CardContent className='space-y-4'>
-                  <div>
-                    <label className='block text-sm font-medium text-white/80 mb-2'>
-                      OpenAI API Key
-                    </label>
-                    <input
-                      type='password'
-                      value={apiKey}
-                      onChange={e => setApiKey(e.target.value)}
-                      placeholder='sk-...'
-                      className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    />
-                    <p className='text-xs text-white/60 mt-1'>
-                      Your API key is stored locally and never shared
-                    </p>
-                  </div>
-                  <Button onClick={() => setShowSettings(false)} className='w-full'>
-                    Save Settings
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Quick Questions */}
-              <Card className='bg-white/10 backdrop-blur-xl border-white/20 mt-4'>
-                <CardHeader>
-                  <CardTitle className='text-white flex items-center gap-2'>
-                    <Lightbulb className='h-5 w-5' />
-                    Quick Questions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className='space-y-2'>
-                  {quickQuestions.map((question, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setInput(question)}
-                      className='w-full text-left p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/80 text-sm transition-all duration-200'
-                    >
-                      {question}
-                    </button>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          {/* Quick Questions */}
+          <div className='lg:col-span-1'>
+            <Card className='bg-white/10 backdrop-blur-xl border-white/20 mt-4'>
+              <CardHeader>
+                <CardTitle className='text-white flex items-center gap-2'>
+                  <Lightbulb className='h-5 w-5' />
+                  Quick Questions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-2'>
+                {quickQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setInput(question)}
+                    className='w-full text-left p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/80 text-sm transition-all duration-200'
+                  >
+                    {question}
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Chat Interface */}
-          <div className={`${showSettings ? 'lg:col-span-3' : 'lg:col-span-4'}`}>
+          <div className='lg:col-span-3'>
             <Card className='bg-white/10 backdrop-blur-xl border-white/20 h-[600px] flex flex-col'>
               {/* Messages */}
               <div className='flex-1 p-6 overflow-y-auto space-y-4'>
@@ -252,6 +260,18 @@ export function AITutoringInterface() {
           </div>
         </div>
       </div>
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={() => {
+          const adminAuthenticated = adminAuth.isAuthenticated();
+          const userApiConfigured = openAIService.isConfigured();
+          setIsAuthenticated(adminAuthenticated || userApiConfigured);
+          setShowAuthModal(false);
+        }}
+      />
     </div>
   );
 }

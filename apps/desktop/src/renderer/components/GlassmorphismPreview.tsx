@@ -132,10 +132,8 @@ export function GlassmorphismSidebarPreview() {
                       <div className='flex items-center gap-2'>
                         <div className='w-12 h-2 bg-white/20 rounded-full overflow-hidden'>
                           <div
-                            className='progress-bar h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full'
-                            style={
-                              { '--progress-width': `${item.progress}%` } as React.CSSProperties
-                            }
+                            className='h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full'
+                            style={{ width: `${item.progress}%` }}
                           />
                         </div>
                         <span className='text-xs text-white/60 font-medium'>{item.progress}%</span>
@@ -286,11 +284,10 @@ export function GlassmorphismSidebarPreview() {
 
                           {/* Progress Bar */}
                           <div className='w-full h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-xl'>
+                            {/* hint-disable-next-line no-inline-styles */}
                             <div
-                              className={`progress-bar h-full bg-gradient-to-r ${module.color} rounded-full`}
-                              style={
-                                { '--progress-width': `${module.progress}%` } as React.CSSProperties
-                              }
+                              className={`h-full bg-gradient-to-r ${module.color} rounded-full`}
+                              style={{ width: `${module.progress}%` }}
                             />
                           </div>
 

@@ -42,6 +42,9 @@ export default {
           '100%': { boxShadow: '0 0 30px rgba(168, 85, 247, 0.8)' },
         },
       },
+      height: {
+        'chat-interface': '600px',
+      },
     },
   },
   plugins: [],

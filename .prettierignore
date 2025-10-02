@@ -1,40 +1,42 @@
-# Dependencies
+# Prettier Ignore
+
+## Dependencies
 
 node_modules/
 pnpm-lock.yaml
 
-# Build outputs
+## Build outputs
 
 dist/
 build/
 *.tsbuildinfo
 
-# Environment files
+## Environment files
 
 .env*
 !.env.example
 
-# Logs
+## Logs
 
 *.log
 logs/
 
-# IDE
+## IDE
 
 .vscode/
 .idea/
 
-# OS
+## OS
 
 .DS_Store
 Thumbs.db
 
-# Package manager files
+## Package manager files
 
 package-lock.json
 yarn.lock
 
-# Generated files
+## Generated files
 
 *.min.js
 *.min.css

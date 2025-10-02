@@ -93,28 +93,27 @@ export class OpenAIService {
     this.checkRateLimit();
 
     // Get API key - prioritize admin key if available
-    let apiKey = adminAuth.getAdminApiKey();
-    let useAdminKey = false;
+    let apiKey: string | null = null;
 
-    if (apiKey && adminAuth.isAuthenticated()) {
-      // Check if admin has remaining requests
-      if (!adminAuth.useRequest()) {
-        throw new Error(
-          'Admin daily request limit reached. Please try again tomorrow or use your own API key.'
-        );
-      }
-      useAdminKey = true;
-    } else {
-      // Fall back to user's own API key
-      if (!ADMIN_CONFIG.ALLOW_USER_KEYS) {
-        throw new Error('Please authenticate as admin to use AI features.');
-      }
-
-      apiKey = this.storage.get();
-      if (!apiKey) {
-        throw new Error('Please configure your OpenAI API key or authenticate as admin.');
-      }
+    if (adminAuth.isAuthenticated() && adminAuth.canMakeRequest()) {
+      apiKey = adminAuth.getAdminApiKey();
+      adminAuth.decrementRequestCount();
     }
+
+    if (!apiKey) {
+      throw new Error(
+        'API key is not configured or you have exceeded your daily request limit. Please log in as admin.'
+      );
+    }
+
+    // DEV-NOTE: Added for debugging API key issues.
+    console.log(`Using API Key: ${apiKey.substring(0, 5)}...${apiKey.substring(apiKey.length - 4)}`);
+
+    // Prepare API request
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    };
 
     // Sanitize message (remove potential harmful content)
     const sanitizedMessage = this.sanitizeMessage(message);
@@ -122,10 +121,7 @@ export class OpenAIService {
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           model: 'gpt-4o-mini', // Use more cost-effective model
           messages: [
@@ -156,12 +152,8 @@ export class OpenAIService {
 
       // Handle specific error codes
       if (response.status === 401) {
-        if (useAdminKey) {
-          throw new Error('Admin API key is invalid or expired. Please contact the administrator.');
-        } else {
-          this.storage.clear(); // Clear invalid user key
-          throw new Error('API key is invalid or expired. Please update your key.');
-        }
+        // Since we are only using the admin key, a 401 error means it's invalid.
+        throw new Error('Admin API key is invalid or expired. Please check the configuration.');
       }
 
       if (response.status === 429) {

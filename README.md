@@ -13,28 +13,33 @@ PharmSchoolEasy transforms the pharmacy school experience by combining cutting-e
 ## ✨ Why PharmSchoolEasy?
 
 ### 🎯 **Built for Pharmacy Students**
+
 - Designed specifically for PharmD curriculum requirements
 - Covers all major therapeutic areas and drug classifications
 - Aligned with NAPLEX and state board exam standards
 
 ### 🧠 **Intelligent Learning System**
+
 - AI-powered information extraction from pharmaceutical content
 - Adaptive spaced repetition algorithms for optimal retention
 - Personalized study paths based on individual progress and weaknesses
 
 ### 💊 **Comprehensive Drug Database**
+
 - Complete drug profiles with mechanisms, interactions, and clinical data
 - FDA-compliant labeling and safety information
 - Advanced search with fuzzy matching across all databases
 - Clinical decision support tools
 
 ### 🎨 **Premium User Experience**
+
 - Modern glassmorphism UI with dark/light themes
 - Desktop-first design with native OS integration
 - Offline-first architecture with cloud synchronization
 - Intuitive navigation designed for extended study sessions
 
 ### 📊 **Advanced Analytics**
+
 - Detailed performance tracking with visual insights
 - Learning weakness identification and targeted recommendations
 - Progress visualization across therapeutic areas
@@ -43,6 +48,7 @@ PharmSchoolEasy transforms the pharmacy school experience by combining cutting-e
 ## 🏗️ Architecture
 
 ### Technology Stack
+
 Following modern development best practices:
 
 - **Desktop Framework**: Electron for cross-platform native experience
@@ -54,7 +60,8 @@ Following modern development best practices:
 - **Package Manager**: pnpm for efficient monorepo management
 
 ### Project Structure
-```
+
+```bash
 apps/
 ├── desktop/            # Electron main process and renderer
 │   ├── src/
@@ -75,13 +82,15 @@ packages/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+ and pnpm
 - Git for version control
 
 ### Installation
+
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/pharmschooleasy.git
+git clone https://github.com/jacksonbarger/pharmschooleasy.git
 cd pharmschooleasy
 
 # Install dependencies
@@ -92,6 +101,7 @@ pnpm dev:desktop
 ```
 
 ### Development Commands
+
 ```bash
 # Desktop development
 pnpm dev:desktop          # Start Electron app in dev mode
@@ -111,11 +121,13 @@ pnpm test                # Run test suite
 ## 🎯 Target Audience
 
 ### Primary Users
+
 - **P1-P4 PharmD Students**: Core curriculum support and exam preparation
 - **Pre-pharmacy Students**: Foundation building and prerequisite mastery
 - **Pharmacy Residents**: Advanced clinical knowledge and board preparation
 
 ### Secondary Users
+
 - **Practicing Pharmacists**: Continuing education and knowledge updates
 - **Pharmacy Technicians**: Certification exam preparation
 - **Pharmacy Educators**: Teaching tools and student progress tracking
@@ -123,6 +135,7 @@ pnpm test                # Run test suite
 ## 🏥 Medical & Educational Standards
 
 PharmSchoolEasy maintains the highest standards:
+
 - **FDA Compliance**: Drug labeling and clinical guidelines
 - **Evidence-Based**: All content verified against authoritative sources
 - **Educational Privacy**: FERPA compliance where applicable
@@ -132,24 +145,28 @@ PharmSchoolEasy maintains the highest standards:
 ## 🔮 Development Roadmap
 
 ### Phase 1: Foundation (Q1 2026) - Current
+
 - ✅ Project architecture and development environment
 - ✅ Modern UI system with glassmorphism design
 - 🔄 Core study modules and flashcard system
 - 🔄 Drug database integration and search functionality
 
 ### Phase 2: AI-Enhanced Learning (Q2 2026)
+
 - 📅 AI-powered content extraction from textbooks and guidelines
 - 📅 Adaptive spaced repetition with performance analytics
 - 📅 Clinical scenario simulations and case studies
 - 📅 NAPLEX-style practice exams with detailed explanations
 
 ### Phase 3: Cloud & Collaboration (Q3 2026)
+
 - 📅 Real-time cloud synchronization across devices
 - 📅 Study group collaboration and shared resources
 - 📅 Educational institution integration
 - 📅 Instructor dashboard for progress monitoring
 
 ### Phase 4: Mobile & Advanced Features (Q4 2026)
+
 - 📅 iOS companion app for mobile studying
 - 📅 Offline-first architecture with smart caching
 - 📅 Professional continuing education modules
@@ -158,13 +175,16 @@ PharmSchoolEasy maintains the highest standards:
 ## 💡 Key Features in Development
 
 ### Smart Study System
+
 - **Adaptive Learning**: AI adjusts difficulty based on performance
 - **Spaced Repetition**: Optimized review scheduling for long-term retention
 - **Weakness Detection**: Identifies knowledge gaps and provides targeted practice
 - **Progress Prediction**: Estimates readiness for exams and board certification
 
 ### Drug Information System
+
 Following pharmaceutical standards:
+
 ```typescript
 // Drug entity structure
 interface DrugProfile {
@@ -186,6 +206,7 @@ interface DrugProfile {
 We welcome contributions from the pharmacy education community!
 
 ### Getting Started
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Follow our coding standards (ESLint + Prettier + TypeScript)
@@ -193,6 +214,7 @@ We welcome contributions from the pharmacy education community!
 5. Submit a pull request with detailed description
 
 ### Content Guidelines
+
 - Use generic drug names as primary identifiers
 - Verify all medical information against FDA-approved sources
 - Include proper attribution for clinical guidelines
@@ -211,10 +233,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact & Support
 
-- **Project Lead**: [Your Name](mailto:your.email@example.com)
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/pharmschooleasy/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/YOUR_USERNAME/pharmschooleasy/discussions)
-- **Documentation**: [Wiki](https://github.com/YOUR_USERNAME/pharmschooleasy/wiki)
+- **Project Lead**: [Jackson Barger](mailto:dbarger488023@student.wmcarey.edu)
+- **Issues**: [GitHub Issues](https://github.com/jacksonbarger/pharmschooleasy/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/jacksonbarger/pharmschooleasy/discussions)
+- **Documentation**: [Wiki](https://github.com/jacksonbarger/pharmschooleasy/wiki)
 
 ---
 

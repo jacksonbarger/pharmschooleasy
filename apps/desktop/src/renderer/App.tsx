@@ -263,7 +263,7 @@ function PharmacyApp() {
             <Route path='/study' element={<Study />} />
             <Route path='/drug/:drugId' element={<DrugDetail />} />
             <Route path='/analytics' element={<Analytics />} />
-            <Route path='/ai-tutor' element={<AITutor />} />
+            <Route path='/ai-tutor' element={<div>AI Tutor Coming Soon</div>} />
           </Routes>
         </Layout>
       </Router>
