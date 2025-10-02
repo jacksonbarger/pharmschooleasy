@@ -1,0 +1,44 @@
+{
+  "name": "pharmschooleasy",
+  "version": "0.1.0",
+  "description": "Modern desktop study application making pharmacy school easy with AI-powered learning tools",
+  "keywords": [
+    "pharmacy",
+    "education", 
+    "study-app",
+    "electron",
+    "react",
+    "medical-education",
+    "pharmD",
+    "drug-database",
+    "spaced-repetition"
+  ],
+  "homepage": "https://github.com/YOUR_USERNAME/pharmschooleasy#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/pharmschooleasy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/pharmschooleasy/issues"
+  },
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter desktop dev",
+    "build": "pnpm --filter desktop build",
+    "extract-content": "node scripts/extract-powerpoint-content.js",
+    "analyze-gaps": "node scripts/analyze-content-gaps.js"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "typescript": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "fileName": "Liver - Students",
+  "processedAt": "2025-10-01T15:46:25.090Z",
+  "slides": [
+    {
+      "slideNumber": 1,
+      "title": "Liver Anatomy & Function",
+      "keyPoints": [
+        "Hepatocytes perform metabolic functions",
+        "Portal circulation from GI tract",
+        "Bile production and secretion"
+      ],
+      "drugReferences": [
+        "Acetaminophen metabolism",
+        "First-pass effect"
+      ],
+      "clinicalPearls": [
+        "Liver disease affects drug clearance"
+      ]
+    },
+    {
+      "slideNumber": 2,
+      "title": "Hepatic Drug Metabolism",
+      "keyPoints": [
+        "Phase I and Phase II reactions",
+        "CYP450 enzyme system",
+        "Drug interactions"
+      ],
+      "drugReferences": [
+        "CYP3A4 substrates",
+        "Warfarin interactions"
+      ],
+      "clinicalPearls": [
+        "Genetic polymorphisms affect metabolism"
+      ]
+    }
+  ],
+  "pharmacologyTopics": [
+    {
+      "topic": "Hepatic Clearance",
+      "description": "First-pass metabolism and bioavailability",
+      "relevantDrugs": [
+        "Propranolol",
+        "Morphine",
+        "Lidocaine"
+      ],
+      "clinicalSignificance": "High hepatic extraction ratio drugs"
+    }
+  ],
+  "identifiedGaps": [
+    "Missing information about hepatic impairment dosing",
+    "No coverage of Child-Pugh classification",
+    "Limited discussion of drug-induced liver injury"
+  ]
+}

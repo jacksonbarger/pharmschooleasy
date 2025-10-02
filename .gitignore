@@ -1,0 +1,89 @@
+# Dependencies
+node_modules/
+*/node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+release/
+app/dist/
+*.tsbuildinfo
+
+# Environment files - NEVER COMMIT API KEYS OR SECRETS
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+*.env
+!.env.example
+
+# API Keys and Secrets (extra safety)
+**/secrets/
+**/*.key
+**/*.pem
+config/secrets.json
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Electron
+app/dist/
+release/
+dist_electron/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+
+# Medical content cache (if applicable)
+.medical-cache/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Generated files
+generated/
