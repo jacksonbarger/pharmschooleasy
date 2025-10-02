@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, TrendingUp, Target, Clock, Award, BarChart3 } from 'lucide-react';
+import { ProgressBar } from '../components/ui/ProgressBar';
+import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 
 interface AnalyticsData {
   studySessionsByDay: { date: string; sessions: number; cardsStudied: number }[];
@@ -133,16 +135,19 @@ export function Analytics() {
                 </div>
 
                 {/* Simple bar chart */}
-                <div className='bg-white/10 rounded-full h-2'>
-                  <div
-                    className='bg-gradient-to-r from-blue-400 to-purple-500 rounded-full h-2 transition-all duration-500'
-                    style={{ width: `${(day.cardsStudied / maxCards) * 100}%` }}
-                  />
-                </div>
+                <ProgressBar
+                  percentage={(day.cardsStudied / maxCards) * 100}
+                  height="sm"
+                  colorClass="bg-gradient-to-r from-blue-400 to-purple-500"
+                  showTransition={true}
+                />
               </div>
             ))}
           </div>
         </div>
+
+        {/* Analytics Dashboard Component */}
+        <AnalyticsDashboard />
 
         {/* Performance Insights */}
         <div className='space-y-8'>

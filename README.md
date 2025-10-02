@@ -27,6 +27,28 @@ PharmSchoolEasy transforms the pharmacy school experience by combining cutting-e
 ### 💊 **Comprehensive Drug Database**
 
 - Complete drug profiles with mechanisms, interactions, and clinical data
+
+```json
+{
+  "desktop": ["electron", "electron-builder", "electron-updater"],
+  "frontend": ["react", "typescript", "vite", "tailwindcss", "@radix-ui/react-*"],
+  "state": ["zustand", "@tanstack/react-query", "immer"],
+  "medical": ["rxnorm-js", "fhir", "clinical-taxonomy"],
+  "charts": ["recharts", "d3", "@visx/visx"],
+  "utils": ["date-fns", "lodash-es", "zod", "nanoid"]
+}
+```
+
+## 🚀 Getting Started
+
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [pnpm](https://pnpm.io/)
+- [Git](https://git-scm.com/)
+
 - FDA-compliant labeling and safety information
 - Advanced search with fuzzy matching across all databases
 - Clinical decision support tools
@@ -61,7 +83,7 @@ Following modern development best practices:
 
 ### Project Structure
 
-```bash
+```sh
 apps/
 ├── desktop/            # Electron main process and renderer
 │   ├── src/
@@ -78,6 +100,8 @@ packages/
 ├── ui/                 # Reusable UI components
 └── medical-data/       # Drug databases and medical content
 ```
+
+## 🚀 Getting Started
 
 ## 🚀 Quick Start
 

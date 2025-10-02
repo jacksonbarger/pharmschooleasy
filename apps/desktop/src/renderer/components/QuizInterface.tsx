@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuizStore } from '../stores/quizStore';
 import { Button } from './ui/Button';
 import { Card, CardContent, CardHeader } from './ui/Card';
+import { ProgressBar } from './ui/ProgressBar';
 import {
   Brain,
   Clock,
@@ -85,7 +86,20 @@ export function QuizInterface() {
   };
 
   if (!currentSession) {
-    return <QuizSelector />;
+    return (
+      <Card className='max-w-2xl mx-auto'>
+        <CardContent className='p-8 text-center space-y-6'>
+          <Brain className='h-16 w-16 mx-auto text-purple-600' />
+          <div className='space-y-2'>
+            <h3 className='text-2xl font-bold'>No Quiz in Progress</h3>
+            <p className='text-gray-600 dark:text-gray-400'>
+              Please start a new quiz from your Study Dashboard.
+            </p>
+          </div>
+          {/* Optionally, add a button to navigate back to the dashboard */}
+        </CardContent>
+      </Card>
+    );
   }
 
   if (isLoading) {
@@ -158,14 +172,12 @@ export function QuizInterface() {
 
           {/* Progress Bar */}
           <div className='mt-6'>
-            <div className='w-full bg-white/20 rounded-2xl h-3 overflow-hidden'>
-              <div
-                className='h-full bg-gradient-to-r from-yellow-300 to-orange-300 rounded-2xl transition-all duration-300 ease-out'
-                style={{
-                  width: `${((currentQuestionIndex + 1) / currentSession.totalQuestions) * 100}%`
-                }}
-              />
-            </div>
+            <ProgressBar
+              percentage={((currentQuestionIndex + 1) / currentSession.totalQuestions) * 100}
+              height="md"
+              colorClass="bg-gradient-to-r from-yellow-300 to-orange-300"
+              showTransition={true}
+            />
           </div>
         </CardContent>
       </Card>

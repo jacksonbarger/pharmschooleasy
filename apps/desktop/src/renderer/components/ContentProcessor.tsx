@@ -2,6 +2,7 @@ import React from 'react';
 import { Upload, FileText, Brain, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
+import { ProgressBar } from './ui/ProgressBar';
 
 interface ProcessingJob {
   id: string;
@@ -35,6 +36,8 @@ const sampleJobs: ProcessingJob[] = [
 export function ContentProcessor() {
   const jobs = React.useState<ProcessingJob[]>(sampleJobs)[0];
   const [selectedModule, setSelectedModule] = React.useState('liver-section');
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const modules = [
     { id: 'liver-section', name: 'Liver Section' },
@@ -44,21 +47,60 @@ export function ContentProcessor() {
     { id: 'endocrine', name: 'Endocrine' },
   ];
 
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('files', file);
+    }
+    formData.append('module', selectedModule);
+
+    try {
+      const response = await fetch('http://localhost:3001/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      alert(result.message);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Upload failed. Please try again.');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
-    <div className='space-y-6'>
-      {/* Header */}
-      <div>
-        <h2 className='text-3xl font-bold text-gray-900 dark:text-white'>Content Processor</h2>
-        <p className='text-gray-600 dark:text-gray-400 mt-1'>
-          Upload PowerPoints and other materials for AI-powered content extraction
-        </p>
-      </div>
+    <div className="p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
+        <div>
+          <h2 className="text-4xl font-bold text-white mb-2">Content Processor</h2>
+          <p className="text-lg text-gray-300">
+            Upload PowerPoints and other materials for AI-powered content extraction
+          </p>
+        </div>
 
       {/* Upload Section */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
           <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
+            <CardTitle className='flex items-center gap-2 text-white'>
               <Upload className='h-5 w-5' />
               Upload Materials
             </CardTitle>
@@ -66,13 +108,14 @@ export function ContentProcessor() {
           <CardContent className='space-y-4'>
             {/* Module Selection */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+              <label htmlFor='target-module' className='block text-sm font-medium text-white mb-2'>
                 Target Module
               </label>
               <select
+                id='target-module'
                 value={selectedModule}
                 onChange={e => setSelectedModule(e.target.value)}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white'
+                className='w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white backdrop-blur-sm focus:ring-2 focus:ring-purple-400 focus:border-purple-400'
               >
                 {modules.map(module => (
                   <option key={module.id} value={module.id}>
@@ -83,34 +126,52 @@ export function ContentProcessor() {
             </div>
 
             {/* File Upload Area */}
-            <div className='border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer'>
-              <FileText className='h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4' />
-              <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-2'>
+            <div 
+              className='border-2 border-dashed border-white/30 rounded-lg p-8 text-center hover:border-purple-400 hover:bg-white/5 transition-all cursor-pointer'
+              onClick={handleFileSelect}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".ppt,.pptx,.pdf,.docx"
+                onChange={handleFileChange}
+                className="hidden"
+                aria-label="Upload PowerPoint files"
+              />
+              <FileText className='h-12 w-12 text-white/70 mx-auto mb-4' />
+              <h3 className='text-lg font-medium text-white mb-2'>
                 Drop files here or click to browse
               </h3>
-              <p className='text-gray-600 dark:text-gray-400 mb-4'>
+              <p className='text-gray-300 mb-4'>
                 Supports: .ppt, .pptx, .pdf, .docx
               </p>
-              <Button>Select Files</Button>
+              <Button 
+                onClick={handleFileSelect}
+                disabled={isUploading}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                {isUploading ? 'Uploading...' : 'Select Files'}
+              </Button>
             </div>
 
             {/* Processing Options */}
             <div className='space-y-3'>
               <label className='flex items-center'>
                 <input type='checkbox' className='rounded mr-2' defaultChecked />
-                <span className='text-sm'>Extract drug information and mechanisms</span>
+                <span className='text-sm text-gray-200'>Extract drug information and mechanisms</span>
               </label>
               <label className='flex items-center'>
                 <input type='checkbox' className='rounded mr-2' defaultChecked />
-                <span className='text-sm'>Identify clinical pearls and key concepts</span>
+                <span className='text-sm text-gray-200'>Identify clinical pearls and key concepts</span>
               </label>
               <label className='flex items-center'>
                 <input type='checkbox' className='rounded mr-2' defaultChecked />
-                <span className='text-sm'>Perform knowledge gap analysis</span>
+                <span className='text-sm text-gray-200'>Perform knowledge gap analysis</span>
               </label>
               <label className='flex items-center'>
                 <input type='checkbox' className='rounded mr-2' />
-                <span className='text-sm'>Generate practice questions</span>
+                <span className='text-sm text-gray-200'>Generate practice questions</span>
               </label>
             </div>
           </CardContent>
@@ -220,11 +281,13 @@ export function ContentProcessor() {
                     <div className='text-sm font-medium text-gray-900 dark:text-white'>
                       {job.progress}%
                     </div>
-                    <div className='w-24 bg-gray-200 rounded-full h-1.5 dark:bg-gray-700'>
-                      <div
-                        className='bg-blue-600 h-1.5 rounded-full transition-all'
-                        style={{ width: `${job.progress}%` }}
-                      ></div>
+                    <div className='w-24'>
+                      <ProgressBar
+                        percentage={job.progress}
+                        height="sm"
+                        colorClass="bg-blue-600"
+                        showTransition={true}
+                      />
                     </div>
                   </div>
 
@@ -239,6 +302,7 @@ export function ContentProcessor() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

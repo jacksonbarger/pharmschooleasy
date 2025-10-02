@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ProgressBar } from './ui/ProgressBar';
 import {
   Brain,
   BarChart3,
@@ -130,10 +131,12 @@ export function GlassmorphismSidebarPreview() {
                   <div className='flex items-center gap-2'>
                     {item.progress !== undefined && (
                       <div className='flex items-center gap-2'>
-                        <div className='w-12 h-2 bg-white/20 rounded-full overflow-hidden'>
-                          <div
-                            className='h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full'
-                            style={{ width: `${item.progress}%` }}
+                        <div className='w-12'>
+                          <ProgressBar
+                            percentage={item.progress}
+                            height="sm"
+                            colorClass="bg-gradient-to-r from-green-400 to-emerald-500"
+                            showTransition={true}
                           />
                         </div>
                         <span className='text-xs text-white/60 font-medium'>{item.progress}%</span>
@@ -283,13 +286,12 @@ export function GlassmorphismSidebarPreview() {
                           </div>
 
                           {/* Progress Bar */}
-                          <div className='w-full h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-xl'>
-                            {/* hint-disable-next-line no-inline-styles */}
-                            <div
-                              className={`h-full bg-gradient-to-r ${module.color} rounded-full`}
-                              style={{ width: `${module.progress}%` }}
-                            />
-                          </div>
+                          <ProgressBar
+                            percentage={module.progress}
+                            height="md"
+                            colorClass={`bg-gradient-to-r ${module.color}`}
+                            showTransition={true}
+                          />
 
                           {/* Action Buttons */}
                           <div className='flex gap-3 pt-2'>

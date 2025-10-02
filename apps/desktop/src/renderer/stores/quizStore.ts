@@ -1,5 +1,36 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { openAIService } from '../services/openai';
+
+// Personalized question generation using uploaded content
+async function generatePersonalizedQuestions(
+  userId: string, 
+  topic: string, 
+  difficulty: string, 
+  count: number
+): Promise<QuizQuestion[]> {
+  const apiEndpoint = process.env.VITE_API_ENDPOINT || 'http://localhost:3001';
+  
+  const response = await fetch(`${apiEndpoint}/api/questions/personalized`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userId,
+      topic,
+      difficulty,
+      count
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Personalized questions failed: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.questions || [];
+}
 
 // Quiz Types and Interfaces (embedded for now)
 interface QuizQuestion {
@@ -60,6 +91,7 @@ interface QuizStore {
   currentQuestionIndex: number;
   isLoading: boolean;
   error: string | null;
+  isQuizVisible: boolean;
 
   // Quiz history and performance
   completedSessions: QuizSession[];
@@ -85,6 +117,8 @@ interface QuizStore {
     count: number
   ) => Promise<QuizQuestion[]>;
   updatePerformance: (moduleId: string, session: QuizSession) => void;
+  showQuiz: () => void;
+  hideQuiz: () => void;
   reset: () => void;
 }
 
@@ -96,6 +130,7 @@ export const useQuizStore = create<QuizStore>()(
       currentQuestionIndex: 0,
       isLoading: false,
       error: null,
+      isQuizVisible: false,
       completedSessions: [],
       performance: {},
 
@@ -118,6 +153,7 @@ export const useQuizStore = create<QuizStore>()(
           currentSession: newSession,
           currentQuestionIndex: 0,
           error: null,
+          isQuizVisible: true,
         });
       },
 
@@ -186,6 +222,7 @@ export const useQuizStore = create<QuizStore>()(
           completedSessions: [...completedSessions, completedSession],
           currentSession: null,
           currentQuestionIndex: 0,
+          isQuizVisible: false,
         });
 
         get().updatePerformance(currentSession.moduleId, completedSession);
@@ -217,14 +254,28 @@ export const useQuizStore = create<QuizStore>()(
         });
       },
 
-      // AI Quiz Generation
+      // AI Quiz Generation with Personalized Content Support
       generateQuestions: async (content, topic, difficulty, count) => {
         set({ isLoading: true, error: null });
 
         try {
-          // This would integrate with your AI service
-          // For now, I'll create a mock generator based on the content
-          const questions = await mockQuestionGenerator(content, topic, difficulty, count);
+          // Try personalized questions first if user has uploaded content
+          const userId = localStorage.getItem('userId') || 'anonymous';
+          
+          if (userId !== 'anonymous') {
+            try {
+              const personalizedQuestions = await generatePersonalizedQuestions(userId, topic, difficulty, count);
+              if (personalizedQuestions.length > 0) {
+                set({ isLoading: false });
+                return personalizedQuestions;
+              }
+            } catch (personalizedError) {
+              console.warn('Personalized questions failed, falling back to general:', personalizedError);
+            }
+          }
+
+          // Fallback to general AI questions
+          const questions = await aiQuestionGenerator(content, topic, difficulty, count);
 
           set({ isLoading: false });
           return questions;
@@ -281,6 +332,10 @@ export const useQuizStore = create<QuizStore>()(
         });
       },
 
+      // Show/Hide Quiz
+      showQuiz: () => set({ isQuizVisible: true }),
+      hideQuiz: () => set({ isQuizVisible: false, currentSession: null, currentQuestionIndex: 0 }),
+
       // Reset quiz state
       reset: () => {
         set({
@@ -288,6 +343,7 @@ export const useQuizStore = create<QuizStore>()(
           currentQuestionIndex: 0,
           isLoading: false,
           error: null,
+          isQuizVisible: false,
         });
       },
     }),
@@ -297,103 +353,157 @@ export const useQuizStore = create<QuizStore>()(
   )
 );
 
-// Mock AI Question Generator (replace with real AI integration)
-async function mockQuestionGenerator(
+// AI-Powered Pharmacy Question Generator
+// Creates doctorate-level content that's supportive and confidence-building
+async function aiQuestionGenerator(
   content: any,
   topic: string,
   difficulty: string,
   count: number
 ): Promise<QuizQuestion[]> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  try {
+    const prompt = createPharmacyQuestionPrompt(content, topic, difficulty, count);
+    const aiResponse = await openAIService.chat(prompt);
+    const questions = parseAIQuestions(aiResponse, topic, difficulty);
+    return questions.slice(0, count);
+  } catch (error) {
+    console.error('AI question generation failed:', error);
+    // Fallback to mock questions if AI fails
+    return createFallbackQuestions(content, topic, difficulty, count);
+  }
+}
 
-  const questions: QuizQuestion[] = [];
+// Creates sophisticated prompts for doctorate-level pharmacy questions
+function createPharmacyQuestionPrompt(content: any, topic: string, difficulty: string, count: number): string {
+  const difficultyInstructions = {
+    easy: 'Create foundational questions that build confidence. Focus on core concepts, definitions, and basic mechanisms. Use encouraging language in explanations.',
+    medium: 'Create intermediate questions that challenge understanding. Include clinical correlations and drug interactions. Provide supportive explanations that guide learning.',
+    hard: 'Create advanced doctorate-level questions that test deep understanding. Include complex clinical scenarios, multiple drug interactions, and advanced mechanisms. Provide comprehensive explanations that break down complex concepts kindly.'
+  };
 
-  // Generate questions based on content
+  const contentSummary = summarizeContent(content);
+  
+  return `You are an expert pharmacy professor creating ${difficulty} level quiz questions for pharmacy doctorate students on "${topic}". 
+
+Your mission is to create questions that are:
+- Academically rigorous at the doctorate level
+- Supportive and confidence-building in tone
+- Clinically relevant and evidence-based
+- Kind but thorough in explanations
+
+${difficultyInstructions[difficulty as keyof typeof difficultyInstructions]}
+
+Content to base questions on:
+${contentSummary}
+
+Create exactly ${count} questions in this JSON format:
+[
+  {
+    "type": "multiple-choice" | "true-false" | "short-answer",
+    "question": "Clear, precise question text",
+    "options": ["option1", "option2", "option3", "option4"] (for multiple-choice only),
+    "correctAnswer": "correct answer",
+    "explanation": "Supportive, educational explanation that builds confidence while teaching the concept thoroughly",
+    "references": ["relevant drugs or concepts"],
+    "tags": ["relevant topic tags"],
+    "estimatedTime": time_in_seconds
+  }
+]
+
+Ensure questions test true understanding, not just memorization. Make explanations encouraging and educational.`;
+}
+
+// Summarizes content for AI prompt
+function summarizeContent(content: any): string {
+  let summary = '';
+  
   if (content.slides) {
+    summary += 'Key Topics:\n';
     content.slides.forEach((slide: any, index: number) => {
-      if (questions.length >= count) return;
-
-      // Multiple choice question from key points
-      if (slide.keyPoints && slide.keyPoints.length > 0) {
-        questions.push({
-          id: `mc-${index}-${Date.now()}`,
-          type: 'multiple-choice',
-          topic: slide.title || topic,
-          difficulty: difficulty as any,
-          question: `Which of the following is a key characteristic of ${slide.title}?`,
-          options: [
-            slide.keyPoints[0],
-            'Decreased protein synthesis',
-            'Enhanced renal clearance',
-            'Reduced bioavailability',
-          ],
-          correctAnswer: slide.keyPoints[0],
-          explanation: `${slide.keyPoints[0]} is indeed a key aspect of ${slide.title}. This is important for understanding hepatic function.`,
-          tags: ['hepatic', 'physiology'],
-          estimatedTime: 45,
-        });
-      }
-
-      // True/false question from clinical pearls
-      if (slide.clinicalPearls && slide.clinicalPearls.length > 0 && questions.length < count) {
-        questions.push({
-          id: `tf-${index}-${Date.now()}`,
-          type: 'true-false',
-          topic: slide.title || topic,
-          difficulty: difficulty as any,
-          question: `True or False: ${slide.clinicalPearls[0]}`,
-          correctAnswer: 'True',
-          explanation: `This is correct. ${slide.clinicalPearls[0]} This clinical pearl is essential for pharmaceutical practice.`,
-          tags: ['clinical', 'hepatic'],
-          estimatedTime: 30,
+      if (slide.title) summary += `- ${slide.title}\n`;
+      if (slide.keyPoints) {
+        slide.keyPoints.forEach((point: string) => {
+          summary += `  • ${point}\n`;
         });
       }
     });
   }
-
-  // Generate questions from pharmacology topics
+  
   if (content.pharmacologyTopics) {
-    content.pharmacologyTopics.forEach((pharmTopic: any, index: number) => {
-      if (questions.length >= count) return;
+    summary += '\nPharmacology Focus:\n';
+    content.pharmacologyTopics.forEach((topic: any) => {
+      summary += `- ${topic.topic}: ${topic.description}\n`;
+      if (topic.relevantDrugs) {
+        summary += `  Drugs: ${topic.relevantDrugs.join(', ')}\n`;
+      }
+    });
+  }
+  
+  if (content.identifiedGaps) {
+    summary += '\nKnowledge Gaps to Address:\n';
+    content.identifiedGaps.forEach((gap: string) => {
+      summary += `- ${gap}\n`;
+    });
+  }
+  
+  return summary || 'General pharmacy concepts and clinical applications';
+}
 
+// Parses AI response into structured questions
+function parseAIQuestions(aiResponse: string, topic: string, difficulty: string): QuizQuestion[] {
+  try {
+    // Extract JSON from AI response (handle potential markdown formatting)
+    const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('No JSON found in AI response');
+    
+    const questionsData = JSON.parse(jsonMatch[0]);
+    
+    return questionsData.map((q: any, index: number) => ({
+      id: `ai-${Date.now()}-${index}`,
+      type: q.type || 'multiple-choice',
+      topic: topic,
+      difficulty: difficulty as any,
+      question: q.question,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation || 'Great job! This concept is important for pharmacy practice.',
+      references: q.references || [],
+      tags: q.tags || [topic.toLowerCase()],
+      estimatedTime: q.estimatedTime || (q.type === 'short-answer' ? 90 : 45)
+    }));
+  } catch (error) {
+    console.error('Failed to parse AI questions:', error);
+    throw error;
+  }
+}
+
+// Fallback questions if AI fails
+function createFallbackQuestions(content: any, topic: string, difficulty: string, count: number): QuizQuestion[] {
+  const questions: QuizQuestion[] = [];
+  
+  // Create basic questions from available content
+  if (content.slides && content.slides.length > 0) {
+    content.slides.slice(0, count).forEach((slide: any, index: number) => {
       questions.push({
-        id: `pharm-${index}-${Date.now()}`,
+        id: `fallback-${Date.now()}-${index}`,
         type: 'multiple-choice',
-        topic: pharmTopic.topic || topic,
+        topic: slide.title || topic,
         difficulty: difficulty as any,
-        question: `What is the clinical significance of ${pharmTopic.topic}?`,
+        question: `What is a key concept related to ${slide.title || topic}?`,
         options: [
-          pharmTopic.clinicalSignificance,
-          'Minimal clinical impact',
-          'Only affects elderly patients',
-          'Primarily concerns injection site reactions',
+          slide.keyPoints?.[0] || 'Important clinical consideration',
+          'Decreased efficacy',
+          'Increased toxicity',
+          'No clinical significance'
         ],
-        correctAnswer: pharmTopic.clinicalSignificance,
-        explanation: `${pharmTopic.clinicalSignificance}. Understanding this concept is crucial for ${pharmTopic.topic}.`,
-        references: pharmTopic.relevantDrugs,
-        tags: ['pharmacology', 'clinical'],
-        estimatedTime: 60,
+        correctAnswer: slide.keyPoints?.[0] || 'Important clinical consideration',
+        explanation: `This is a fundamental concept in ${topic}. Understanding this helps build a strong foundation for clinical practice.`,
+        references: slide.drugReferences || [],
+        tags: [topic.toLowerCase(), 'foundation'],
+        estimatedTime: 45
       });
     });
   }
-
-  // Fill remaining slots with gap-based questions
-  while (questions.length < count && content.identifiedGaps) {
-    const gap = content.identifiedGaps[questions.length % content.identifiedGaps.length];
-
-    questions.push({
-      id: `gap-${questions.length}-${Date.now()}`,
-      type: 'short-answer',
-      topic: 'Knowledge Gaps',
-      difficulty: 'hard',
-      question: `Describe the clinical considerations for: ${gap.replace('Missing information about ', '').replace('No coverage of ', '').replace('Limited discussion of ', '')}`,
-      correctAnswer: 'This topic requires further study and clinical experience.',
-      explanation: `${gap}. This represents an important area for continued learning and professional development.`,
-      tags: ['gaps', 'advanced'],
-      estimatedTime: 90,
-    });
-  }
-
+  
   return questions.slice(0, count);
 }

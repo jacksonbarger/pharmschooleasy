@@ -4,8 +4,13 @@
   "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 3000",
-    "build": "vite build",
+    "dev": "concurrently \"npm run dev:vite\" \"wait-on http://localhost:5173 && npm run dev:electron\"",
+    "dev:vite": "vite --port 5173",
+    "dev:build-main": "tsc --project tsconfig.node.json --outDir dist-electron",
+    "dev:electron": "npm run dev:build-main && NODE_ENV=development electron ./dist-electron/main.js",
+    "build": "npm run dev:build-main && vite build && electron-builder",
+    "build:vite": "vite build",
+    "build:electron": "electron-builder",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
@@ -33,6 +38,7 @@
     "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.1",
     "electron": "^26.3.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^8.50.0",
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-react": "^7.33.2",
@@ -41,8 +47,30 @@
     "prettier": "^3.0.3",
     "tailwindcss": "^3.3.3",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.2.2",
     "vite": "^4.4.11",
     "wait-on": "^7.0.1"
+  },
+  "build": {
+    "appId": "com.pharmschool.app",
+    "productName": "Pharmacy School Study App",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "src/main/main.ts"
+    ],
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }

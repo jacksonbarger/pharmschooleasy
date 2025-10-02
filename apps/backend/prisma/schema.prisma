@@ -1,0 +1,73 @@
+// npx prisma init
+// npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isPremium     Boolean  @default(false)
+  decks         Deck[]
+  studyLogs     StudyLog[]
+  subscriptions Subscription[]
+}
+
+model Deck {
+  id        String  @id @default(cuid())
+  title     String
+  ownerId   String
+  owner     User    @relation(fields: [ownerId], references: [id])
+  isPublic  Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cards     Card[]
+}
+
+model Card {
+  id           String     @id @default(cuid())
+  deckId       String
+  deck         Deck       @relation(fields: [deckId], references: [id])
+  front        String
+  back         String
+  // spaced repetition fields
+  ease         Float      @default(2.5)
+  interval     Int        @default(0)  // days
+  repetitions  Int        @default(0)
+  dueAt        DateTime   @default(now())
+  // your signature feature
+  hidden       Boolean    @default(false) // "We won't be tested on that"
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  studyLogs    StudyLog[]
+}
+
+model StudyLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id])
+  rating    Int      // 1=Again,2=Hard,3=Good,4=Easy
+  timeSpent Int      // seconds
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  stripeId  String   @unique
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

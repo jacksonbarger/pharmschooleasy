@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, RotateCcw, Eye, EyeOff, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { ProgressBar } from '../components/ui/ProgressBar';
 
 interface StudyCard {
   id: string;
@@ -99,12 +100,11 @@ export function Study() {
         </div>
 
         {/* Progress Bar */}
-        <div className='bg-white/10 rounded-full h-2'>
-          <div
-            className='bg-gradient-to-r from-purple-400 to-pink-400 rounded-full h-2 transition-all duration-500'
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        <ProgressBar
+          percentage={progress}
+          colorClass='from-purple-400 to-pink-400'
+          height='sm'
+        />
       </div>
 
       {/* Study Card */}

@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '../../lib/utils';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'premium';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
 }
@@ -26,6 +26,8 @@ export function Button({
       'border-2 border-purple-300 dark:border-purple-600 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl hover:bg-white/90 dark:hover:bg-slate-900/90 hover:border-purple-400 dark:hover:border-purple-500 shadow-xl hover:shadow-2xl text-purple-700 dark:text-purple-300',
     ghost:
       'hover:bg-purple-100/50 dark:hover:bg-purple-900/20 backdrop-blur-sm hover:shadow-lg text-purple-700 dark:text-purple-300',
+    premium:
+      'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white shadow-lg hover:shadow-orange-500/40 border-0',
   };
 
   const sizeClasses = {
