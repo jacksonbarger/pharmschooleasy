@@ -27,23 +27,20 @@ function getEnvVar(key: string, fallback: string = ''): string {
  * Validate that required environment variables are set
  */
 function validateEnvironment(): { isValid: boolean; missingVars: string[] } {
-  const requiredVars = [
-    'VITE_OPENAI_API_KEY',
-    'VITE_ADMIN_PASSWORD'
-  ];
-  
+  const requiredVars = ['VITE_OPENAI_API_KEY', 'VITE_ADMIN_PASSWORD'];
+
   const missingVars: string[] = [];
-  
+
   for (const varName of requiredVars) {
     const value = getEnvVar(varName);
     if (!value || value === '' || value.includes('your-') || value.includes('<your')) {
       missingVars.push(varName);
     }
   }
-  
+
   return {
     isValid: missingVars.length === 0,
-    missingVars
+    missingVars,
   };
 }
 
@@ -58,7 +55,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     perUserSessionLimit: Number(getEnvVar('VITE_PER_USER_SESSION_LIMIT', '20')),
     adminModeEnabled: getEnvVar('VITE_ADMIN_MODE_ENABLED', 'true') === 'true',
     appVersion: getEnvVar('VITE_APP_VERSION', '0.1.0'),
-    isDevelopment: getEnvVar('NODE_ENV', 'development') === 'development'
+    isDevelopment: getEnvVar('NODE_ENV', 'development') === 'development',
   };
 }
 
@@ -67,13 +64,15 @@ export function getEnvironmentConfig(): EnvironmentConfig {
  */
 export function validateAndGetConfig(): EnvironmentConfig {
   const validation = validateEnvironment();
-  
+
   if (!validation.isValid) {
     console.error('❌ Missing required environment variables:', validation.missingVars);
-    console.error('📋 Please check your .env.local file and ensure all required variables are set.');
+    console.error(
+      '📋 Please check your .env.local file and ensure all required variables are set.'
+    );
     console.error('📖 See README.md for setup instructions.');
   }
-  
+
   return getEnvironmentConfig();
 }
 

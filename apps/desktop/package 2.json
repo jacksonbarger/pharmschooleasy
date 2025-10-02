@@ -47,9 +47,6 @@
     "directories": {
       "output": "dist"
     },
-    "files": [
-      "dist/**/*",
-      "dist-electron/**/*"
-    ]
+    "files": ["dist/**/*", "dist-electron/**/*"]
   }
 }

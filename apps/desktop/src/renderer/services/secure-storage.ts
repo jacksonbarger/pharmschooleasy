@@ -46,8 +46,9 @@ class SecureApiKeyStorage implements ApiKeyStorage {
   }
 
   private generateSalt(): string {
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    );
   }
 
   /**
@@ -58,9 +59,9 @@ class SecureApiKeyStorage implements ApiKeyStorage {
     const patterns = [
       /^sk-[a-zA-Z0-9]{20}T3BlbkFJ[a-zA-Z0-9]{20}$/, // Legacy format
       /^sk-proj-[a-zA-Z0-9_-]{43,}$/, // New project format
-      /^sk-[a-zA-Z0-9_-]{43,}$/ // General format
+      /^sk-[a-zA-Z0-9_-]{43,}$/, // General format
     ];
-    
+
     return patterns.some(pattern => pattern.test(key.trim()));
   }
 
@@ -77,9 +78,9 @@ class SecureApiKeyStorage implements ApiKeyStorage {
       const response = await fetch('https://api.openai.com/v1/models', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       return response.status === 200;
@@ -102,7 +103,7 @@ class SecureApiKeyStorage implements ApiKeyStorage {
     try {
       const encrypted = localStorage.getItem(this.STORAGE_KEY);
       const salt = localStorage.getItem(this.SALT_KEY);
-      
+
       if (encrypted && salt) {
         const decrypted = this.decrypt(encrypted, salt);
         if (this.validateKeyFormat(decrypted)) {
@@ -122,7 +123,7 @@ class SecureApiKeyStorage implements ApiKeyStorage {
    */
   async set(key: string): Promise<boolean> {
     const trimmedKey = key.trim();
-    
+
     // Validate format first
     if (!this.validateKeyFormat(trimmedKey)) {
       throw new Error('Invalid API key format. Please check your key and try again.');
@@ -133,19 +134,19 @@ class SecureApiKeyStorage implements ApiKeyStorage {
       const response = await fetch('https://api.openai.com/v1/models', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${trimmedKey}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${trimmedKey}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.status === 401) {
         throw new Error('API key is invalid or expired. Please check your key.');
       }
-      
+
       if (response.status === 429) {
         throw new Error('API key has exceeded rate limits. Please try again later.');
       }
-      
+
       if (!response.ok) {
         throw new Error('Unable to validate API key. Please check your connection.');
       }
@@ -160,11 +161,11 @@ class SecureApiKeyStorage implements ApiKeyStorage {
     try {
       const salt = this.generateSalt();
       const encrypted = this.encrypt(trimmedKey, salt);
-      
+
       localStorage.setItem(this.STORAGE_KEY, encrypted);
       localStorage.setItem(this.SALT_KEY, salt);
       this.memoryKey = trimmedKey;
-      
+
       return true;
     } catch (error) {
       console.error('Failed to store API key:', error);
@@ -199,7 +200,7 @@ class SecureApiKeyStorage implements ApiKeyStorage {
   getMasked(): string {
     const key = this.get();
     if (!key) return 'Not configured';
-    
+
     if (key.startsWith('sk-proj-')) {
       return `sk-proj-${'*'.repeat(8)}...${key.slice(-4)}`;
     }
@@ -213,7 +214,7 @@ let apiKeyStorage: SecureApiKeyStorage | null = null;
 export const getApiKeyStorage = (): SecureApiKeyStorage => {
   if (!apiKeyStorage) {
     apiKeyStorage = new SecureApiKeyStorage();
-    
+
     // Clear memory cache on page unload for security
     window.addEventListener('beforeunload', () => {
       if (apiKeyStorage) {
@@ -221,7 +222,7 @@ export const getApiKeyStorage = (): SecureApiKeyStorage => {
       }
     });
   }
-  
+
   return apiKeyStorage;
 };
 

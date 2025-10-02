@@ -62,15 +62,16 @@ export class OpenAIService {
   private checkRateLimit(): void {
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequestTime;
-    
-    if (timeSinceLastRequest < 60000) { // Within last minute
+
+    if (timeSinceLastRequest < 60000) {
+      // Within last minute
       if (this.requestCount >= this.MAX_REQUESTS_PER_MINUTE) {
         throw new Error('Rate limit exceeded. Please wait before making more requests.');
       }
     } else {
       this.requestCount = 0; // Reset counter after a minute
     }
-    
+
     this.requestCount++;
     this.lastRequestTime = now;
   }
@@ -94,11 +95,13 @@ export class OpenAIService {
     // Get API key - prioritize admin key if available
     let apiKey = adminAuth.getAdminApiKey();
     let useAdminKey = false;
-    
+
     if (apiKey && adminAuth.isAuthenticated()) {
       // Check if admin has remaining requests
       if (!adminAuth.useRequest()) {
-        throw new Error('Admin daily request limit reached. Please try again tomorrow or use your own API key.');
+        throw new Error(
+          'Admin daily request limit reached. Please try again tomorrow or use your own API key.'
+        );
       }
       useAdminKey = true;
     } else {
@@ -106,7 +109,7 @@ export class OpenAIService {
       if (!ADMIN_CONFIG.ALLOW_USER_KEYS) {
         throw new Error('Please authenticate as admin to use AI features.');
       }
-      
+
       apiKey = this.storage.get();
       if (!apiKey) {
         throw new Error('Please configure your OpenAI API key or authenticate as admin.');
@@ -120,7 +123,7 @@ export class OpenAIService {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -137,17 +140,17 @@ export class OpenAIService {
               - Refuse to provide dosing recommendations or treatment advice
               - If asked about specific patient cases, redirect to educational concepts
               
-              ${context ? `Context: ${context}` : ''}`
+              ${context ? `Context: ${context}` : ''}`,
             },
             {
               role: 'user',
-              content: sanitizedMessage
-            }
-        ],
+              content: sanitizedMessage,
+            },
+          ],
           max_tokens: 800,
           temperature: 0.3, // Lower temperature for more consistent responses
           presence_penalty: 0.1,
-          frequency_penalty: 0.1
+          frequency_penalty: 0.1,
         }),
       });
 
@@ -171,21 +174,20 @@ export class OpenAIService {
 
       if (!response.ok) {
         const errorData: OpenAIError = await response.json().catch(() => ({
-          error: { message: 'Unknown error occurred', type: 'api_error' }
+          error: { message: 'Unknown error occurred', type: 'api_error' },
         }));
-        
+
         throw new Error(`OpenAI Error: ${errorData.error.message}`);
       }
 
       const data: OpenAIResponse = await response.json();
       const content = data.choices[0]?.message?.content;
-      
+
       if (!content) {
         throw new Error('No response received from AI. Please try again.');
       }
 
       return this.sanitizeResponse(content);
-
     } catch (error) {
       if (error instanceof Error) {
         throw error;
@@ -211,7 +213,7 @@ export class OpenAIService {
     return response
       .trim()
       .replace(/\*\*(.*?)\*\*/g, '$1') // Remove markdown bold
-      .replace(/\*(.*?)\*/g, '$1')     // Remove markdown italic
+      .replace(/\*(.*?)\*/g, '$1') // Remove markdown italic
       .substring(0, 4000); // Limit response length
   }
 
@@ -254,7 +256,7 @@ export class OpenAIService {
   getUsageStats(): { requestCount: number; lastRequestTime: number } {
     return {
       requestCount: this.requestCount,
-      lastRequestTime: this.lastRequestTime
+      lastRequestTime: this.lastRequestTime,
     };
   }
 }
