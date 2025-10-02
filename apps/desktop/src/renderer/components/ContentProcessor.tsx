@@ -33,7 +33,7 @@ const sampleJobs: ProcessingJob[] = [
 ];
 
 export function ContentProcessor() {
-  const [jobs, setJobs] = React.useState<ProcessingJob[]>(sampleJobs);
+  const jobs = React.useState<ProcessingJob[]>(sampleJobs)[0];
   const [selectedModule, setSelectedModule] = React.useState('liver-section');
 
   const modules = [

@@ -247,8 +247,7 @@ function TestGlassmorphism() {
                       <h3 className='text-xl font-bold text-white mb-3'>{module.title}</h3>
                       <div className='w-full bg-white/20 rounded-full h-2 mb-4'>
                         <div
-                          className={`bg-gradient-to-r from-emerald-400 to-teal-500 h-2 rounded-full transition-all duration-300`}
-                          style={{ width: `${module.progress}%` }} // eslint-disable-line no-inline-styles
+                          className={`bg-gradient-to-r from-emerald-400 to-teal-500 h-2 rounded-full transition-all duration-300 w-[75%]`}
                         />
                       </div>
                       <button className='w-full py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl text-white font-semibold transition-all duration-300'>

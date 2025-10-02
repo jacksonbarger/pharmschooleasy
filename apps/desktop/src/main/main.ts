@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const isDev = process.env.NODE_ENV === 'development';
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -49,12 +48,12 @@ app.on('window-all-closed', () => {
 });
 
 // IPC handlers for file operations and AI processing
-ipcMain.handle('process-powerpoint', async (event, filePath: string) => {
+ipcMain.handle('process-powerpoint', async () => {
   // TODO: Implement PowerPoint processing logic
   return { success: true, extractedContent: [] };
 });
 
-ipcMain.handle('analyze-content-gaps', async (event, content: any[]) => {
+ipcMain.handle('analyze-content-gaps', async () => {
   // TODO: Implement gap analysis logic
   return { gaps: [], suggestions: [] };
 });

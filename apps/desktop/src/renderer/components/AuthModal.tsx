@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { X, Shield, Key, Users } from 'lucide-react';
+import { X, Shield, Key } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { AdminLogin } from './AdminLogin';

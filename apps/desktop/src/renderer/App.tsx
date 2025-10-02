@@ -1,3 +1,4 @@
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -263,7 +264,7 @@ function PharmacyApp() {
             <Route path='/study' element={<Study />} />
             <Route path='/drug/:drugId' element={<DrugDetail />} />
             <Route path='/analytics' element={<Analytics />} />
-            <Route path='/ai-tutor' element={<div>AI Tutor Coming Soon</div>} />
+            <Route path='/ai-tutor' element={<AITutor />} />
           </Routes>
         </Layout>
       </Router>

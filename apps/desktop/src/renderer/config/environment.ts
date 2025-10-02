@@ -13,12 +13,18 @@ interface EnvironmentConfig {
   isDevelopment: boolean;
 }
 
+/// <reference types="vite/client" />
+
+/**
+ * Environment configuration utilities
+ */
+
 /**
  * Get environment variable safely with fallback
  */
 function getEnvVar(key: string, fallback: string = ''): string {
   if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env[key as keyof ImportMetaEnv] || fallback;
+    return (import.meta.env as any)[key] || fallback;
   }
   return fallback;
 }

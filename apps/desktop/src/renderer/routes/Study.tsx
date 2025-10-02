@@ -37,13 +37,12 @@ export function Study() {
   const [showBack, setShowBack] = useState(false);
   const [sessionCards] = useState(mockCards);
   const [sessionStartTime] = useState(new Date());
-  const [cardStartTime, setCardStartTime] = useState(new Date());
 
   const currentCard = sessionCards[currentCardIndex];
   const progress = ((currentCardIndex + 1) / sessionCards.length) * 100;
 
   useEffect(() => {
-    setCardStartTime(new Date());
+    // Card start time tracking removed - can be added back if needed
   }, [currentCardIndex]);
 
   const handleCardFlip = () => {
@@ -61,13 +60,6 @@ export function Study() {
     } else {
       // Session complete
       console.log('Session complete!');
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
-      setShowBack(false);
     }
   };
 

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Lightbulb, Settings, LogIn } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Bot, User, Lightbulb, LogIn } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { openAIService, ChatMessage } from '../services/openai';

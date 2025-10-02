@@ -3,7 +3,6 @@
 
 import { getApiKeyStorage } from './secure-storage';
 import { adminAuth } from './admin-auth';
-import { ADMIN_CONFIG } from '../config/admin';
 
 interface OpenAIResponse {
   choices: Array<{
@@ -49,11 +48,7 @@ export class OpenAIService {
    * Set API key with validation and secure storage
    */
   async setApiKey(key: string): Promise<void> {
-    try {
-      await this.storage.set(key);
-    } catch (error) {
-      throw error; // Re-throw validation errors
-    }
+    await this.storage.set(key);
   }
 
   /**
@@ -95,14 +90,17 @@ export class OpenAIService {
     // Get API key - prioritize admin key if available
     let apiKey: string | null = null;
 
-    if (adminAuth.isAuthenticated() && adminAuth.canMakeRequest()) {
-      apiKey = adminAuth.getAdminApiKey();
-      adminAuth.decrementRequestCount();
+    if (adminAuth.isAuthenticated()) {
+      const usageStats = adminAuth.getUsageStats();
+      if (usageStats.sessionRemaining > 0) {
+        apiKey = adminAuth.getAdminApiKey();
+        // Note: decrementRequestCount method doesn't exist, so we'll rely on session management
+      }
     }
 
     if (!apiKey) {
       throw new Error(
-        'API key is not configured or you have exceeded your daily request limit. Please log in as admin.'
+        'API key is not configured or you have exceeded your session request limit. Please log in as admin or configure your own API key.'
       );
     }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuizStore } from '../stores/quizStore';
 import { Button } from './ui/Button';
 import { Card, CardContent, CardHeader } from './ui/Card';
@@ -160,12 +160,10 @@ export function QuizInterface() {
           <div className='mt-6'>
             <div className='w-full bg-white/20 rounded-2xl h-3 overflow-hidden'>
               <div
-                className='progress-bar h-full bg-gradient-to-r from-yellow-300 to-orange-300 rounded-2xl'
-                style={
-                  {
-                    '--progress-width': `${((currentQuestionIndex + 1) / currentSession.totalQuestions) * 100}%`,
-                  } as React.CSSProperties
-                }
+                className='h-full bg-gradient-to-r from-yellow-300 to-orange-300 rounded-2xl transition-all duration-300 ease-out'
+                style={{
+                  width: `${((currentQuestionIndex + 1) / currentSession.totalQuestions) * 100}%`
+                }}
               />
             </div>
           </div>

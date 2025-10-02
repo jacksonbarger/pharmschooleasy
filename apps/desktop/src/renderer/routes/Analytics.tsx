@@ -29,7 +29,7 @@ const mockAnalytics: AnalyticsData = {
 };
 
 export function Analytics() {
-  const [analytics, setAnalytics] = useState<AnalyticsData>(mockAnalytics);
+  const analytics = useState<AnalyticsData>(mockAnalytics)[0];
   const [selectedTimeframe, setSelectedTimeframe] = useState<'week' | 'month' | 'all'>('week');
 
   useEffect(() => {
